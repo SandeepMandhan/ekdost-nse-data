@@ -17,7 +17,7 @@ import requests
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 KEEP = {"EQ", "BE", "BZ", "SM", "ST"}
-DAYS = int(os.environ.get("DAYS", "370"))
+DAYS = int(os.environ.get("DAYS", "740"))   # two years: charts and technicals need 200+ days of history
 NOW = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None) + dt.timedelta(hours=5, minutes=30)   # India time
 TODAY = NOW.date()
 
