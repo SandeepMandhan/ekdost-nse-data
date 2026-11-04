@@ -1,10 +1,10 @@
 {
- "updated": "2026-11-04 23:06 IST",
+ "updated": "2026-11-04 23:09 IST",
  "parts": {
   "daily": "ok",
   "deals_today": "ok",
   "deals_history": "ok",
-  "insider": "ok",
+  "insider": "partial",
   "announcements": "ok",
   "fiidii": "ok"
  }
