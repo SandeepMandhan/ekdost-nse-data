@@ -8,6 +8,7 @@ so the EkDost app (on Google's servers, which NSE blocks) can read them from Git
   insider/insider.csv                  promoter & insider trades (SEBI PIT disclosures), one year
   announcements/ann.csv                corporate announcements, last 45 days
   fiidii/fiidii.csv                    FII / DII cash-market buying and selling, built up day by day
+  fiidii/participant_oi.csv            F&O open positions of FII, DII, Pro and Client (index / stock futures and options), two years
   status.json                          which parts NSE allowed on the last run
 Nothing is changed or estimated: rows are copied from NSE's files and reports as published.
 """
@@ -89,11 +90,26 @@ for i in range(DAYS):
         print(iso, "unexpected content"); failed += 1
         continue
     lines = text.splitlines()
+    try:
+        fdate = dt.datetime.strptime(lines[1].split(",")[2].strip().title(), "%d-%b-%Y").date()
+    except Exception:
+        fdate = d
+    if fdate != d:                                # a market holiday: NSE serves the previous day's file under this name
+        hol.add(iso); continue
     rows = [lines[0]] + [l for l in lines[1:] if len(l.split(",")) > 2 and l.split(",")[1].strip() in KEEP]
     with open("bhav/" + name, "w", newline="\n") as f:
         f.write("\n".join(rows) + "\n")
     have.add(iso); saved += 1
     time.sleep(0.8)
+for iso in sorted(have):                          # tidy up: holiday copies saved by earlier versions
+    p_ = "bhav/sec_bhavdata_full_%s.csv" % dt.date.fromisoformat(iso).strftime("%d%m%Y")
+    try:
+        with open(p_) as fh:
+            fh.readline(); first = fh.readline()
+        if dt.datetime.strptime(first.split(",")[2].strip().title(), "%d-%b-%Y").date().isoformat() != iso:
+            os.remove(p_); have.discard(iso); hol.add(iso)
+    except Exception:
+        pass
 cut = (TODAY - dt.timedelta(days=DAYS + 10)).isoformat()
 for fn in os.listdir("bhav"):                     # keep about a year
     if fn.startswith("sec_bhavdata_full_"):
@@ -303,6 +319,61 @@ with open(fpath, "w", newline="") as f:
     for row in sorted(fd.values(), key=lambda r: (r["date"], r["who"]), reverse=True)[:800]:
         w.writerow(row)
 print("FII/DII days:", len(fd) // 2, STATUS["fiidii"])
+
+# ---------- F&O positions by participant: FII, DII, Pro, Client (NSE clearing archive, one small file per day) ----------
+PFIELDS = ["fut_idx_long", "fut_idx_short", "fut_stk_long", "fut_stk_short", "opt_idx_call_long", "opt_idx_put_long", "opt_idx_call_short", "opt_idx_put_short",
+           "opt_stk_call_long", "opt_stk_put_long", "opt_stk_call_short", "opt_stk_put_short", "total_long", "total_short"]
+PCOLS = ["future index long", "future index short", "future stock long", "future stock short", "option index call long", "option index put long", "option index call short",
+         "option index put short", "option stock call long", "option stock put long", "option stock call short", "option stock put short", "total long contracts", "total short contracts"]
+ppath = "fiidii/participant_oi.csv"; P = {}
+if os.path.exists(ppath):
+    for row in csv.DictReader(open(ppath)):
+        P[(row["date"], row["type"])] = row
+done_p = {d for (d, t) in P}
+got_p = 0
+for iso in sorted(have, reverse=True):
+    if iso in done_p or iso < (TODAY - dt.timedelta(days=DAYS)).isoformat():
+        continue
+    dd = dt.date.fromisoformat(iso).strftime("%d%m%Y"); text = None
+    for u in ("https://nsearchives.nseindia.com/content/nsccl/fao_participant_oi_%s.csv" % dd, "https://nsearchives.nseindia.com/content/nsccl/fao_participant_oi_%s_b.csv" % dd):
+        r = get(u)
+        if r is not None and r.status_code == 200 and "client type" in r.text.lower():
+            text = r.text.lstrip("\ufeff"); break
+    if not text:
+        continue
+    lines = [l for l in text.splitlines() if l.strip()]
+    import re as _re
+    m_ = _re.search(r"as on ([A-Za-z]{3}) (\d{1,2}),? (\d{4})", text)
+    if m_:
+        try:
+            if dt.datetime.strptime("%s %s %s" % (m_.group(2), m_.group(1).title(), m_.group(3)), "%d %b %Y").date().isoformat() != iso:
+                continue                          # holiday copy of the previous day
+        except Exception:
+            pass
+    hi = next((i for i, l in enumerate(lines) if "client type" in l.lower()), None)
+    if hi is None:
+        continue
+    head = [h.strip().lower() for h in next(csv.reader([lines[hi]]))]
+    for f in csv.reader(lines[hi + 1:]):
+        if not f or not f[0].strip():
+            continue
+        typ = f[0].strip().upper()
+        if typ not in ("CLIENT", "DII", "FII", "PRO", "TOTAL"):
+            continue
+        row = {"date": iso, "type": typ.title() if typ in ("CLIENT", "PRO", "TOTAL") else typ}
+        for k, c in zip(PFIELDS, PCOLS):
+            j = head.index(c) if c in head else -1
+            row[k] = num(f[j]) if 0 <= j < len(f) else ""
+        P[(iso, row["type"])] = row
+    got_p += 1
+    time.sleep(0.5)
+os.makedirs("fiidii", exist_ok=True)
+with open(ppath, "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=["date", "type"] + PFIELDS); w.writeheader()
+    for row in sorted(P.values(), key=lambda r: (r["date"], r["type"]), reverse=True):
+        w.writerow(row)
+STATUS["participant_oi"] = "ok" if P else "blocked"
+print("participant OI days added:", got_p, "total days:", len({d for (d, t) in P}))
 
 keep_from = (TODAY - dt.timedelta(days=400)).isoformat()
 with open(dpath, "w", newline="") as f:
