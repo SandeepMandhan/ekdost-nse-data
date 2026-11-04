@@ -4,10 +4,15 @@ so the EkDost app (on Google's servers, which NSE blocks) can read them from Git
   bhav/sec_bhavdata_full_DDMMYYYY.csv  NSE "full bhavcopy and security deliverable data" (only share series EQ, BE, BZ, SM, ST;
                                        columns unchanged: OPEN/HIGH/LOW/CLOSE, AVG_PRICE = VWAP, TTL_TRD_QNTY, DELIV_QTY, DELIV_PER)
   bhav/index.json                      which dates are here, and which weekdays were market holidays
-  deals/deals.csv                      bulk and block deals, one year, built up day by day
-Nothing is changed or estimated: rows are copied from NSE's files as published.
+  deals/deals.csv                      bulk and block deals, one year (history from NSE's report, then day by day)
+  insider/insider.csv                  promoter & insider trades (SEBI PIT disclosures), one year
+  announcements/ann.csv                corporate announcements, last 45 days
+  fiidii/fiidii.csv                    FII / DII cash-market buying and selling, built up day by day
+  status.json                          which parts NSE allowed on the last run
+Nothing is changed or estimated: rows are copied from NSE's files and reports as published.
 """
 import csv, datetime as dt, io, json, os, sys, time
+STATUS = {}
 import requests
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
@@ -79,6 +84,7 @@ for fn in os.listdir("bhav"):                     # keep about a year
 json.dump({"dates": sorted(have), "holidays": sorted(h for h in hol if h >= cut), "updated": NOW.strftime("%Y-%m-%d %H:%M IST")},
           open(idx_path, "w"), indent=0)
 print("daily files saved:", saved, "failed:", failed, "total:", len(have))
+STATUS["daily"] = "ok" if have else "blocked"
 
 # ---------- bulk & block deals ----------
 os.makedirs("deals", exist_ok=True)
@@ -121,6 +127,139 @@ for kind, url in (("Bulk", "https://nsearchives.nseindia.com/content/equities/bu
                "qty": f[iQ].replace(",", "").strip(), "price": f[iP].replace(",", "").strip()}
         deals[tuple(row[k] for k in ("date", "kind", "symbol", "client", "side", "qty", "price"))] = row; n += 1
     print(kind, "deals read:", n)
+    STATUS["deals_today"] = "ok"
+
+# ---------- NSE website reports (need a browser-like session) ----------
+def api(path):
+    r = get("https://www.nseindia.com/api/" + path)
+    if r is None or r.status_code != 200:
+        return None
+    try:
+        return r.json()
+    except Exception:
+        return None
+def rows_of(j):
+    return j if isinstance(j, list) else (j or {}).get("data", []) if isinstance(j, dict) else []
+def pick(o, *names):
+    for n in names:
+        v = o.get(n)
+        if v not in (None, ""):
+            return v
+    return ""
+def num(x):
+    try:
+        return float(str(x).replace(",", "").strip())
+    except Exception:
+        return ""
+def ddmmyyyy(d):
+    return d.strftime("%d-%m-%Y")
+
+# deals history: one year from NSE's bulk / block deals report (once), then the daily files above keep it current
+if not os.path.exists("deals/.history_done"):
+    ok_any = False
+    for kind, opt in (("Bulk", "bulk_deals"), ("Block", "block_deals")):
+        start = TODAY - dt.timedelta(days=365)
+        while start < TODAY:
+            end = min(start + dt.timedelta(days=30), TODAY)
+            j = api("historicalOR/bulk-block-short-deals?optionType=%s&from=%s&to=%s" % (opt, ddmmyyyy(start), ddmmyyyy(end)))
+            for o in rows_of(j):
+                d = iso_of(str(pick(o, "BD_DT_DATE", "date", "mTIMESTAMP")))
+                if not d:
+                    continue
+                ok_any = True
+                row = {"date": d, "kind": kind, "symbol": str(pick(o, "BD_SYMBOL", "symbol")).strip().upper(), "client": str(pick(o, "BD_CLIENT_NAME", "clientName")).strip().replace(",", ";"),
+                       "side": "SELL" if str(pick(o, "BD_BUY_SELL", "buySell")).strip().upper().startswith("S") else "BUY",
+                       "qty": str(num(pick(o, "BD_QTY_TRD", "qty"))).replace(".0", ""), "price": str(num(pick(o, "BD_TP_WATP", "watp", "price")))}
+                deals[tuple(row[k] for k in ("date", "kind", "symbol", "client", "side", "qty", "price"))] = row
+            start = end + dt.timedelta(days=1); time.sleep(1)
+    STATUS["deals_history"] = "ok" if ok_any else "blocked"
+    if ok_any:
+        open("deals/.history_done", "w").write(NOW.isoformat())
+else:
+    STATUS["deals_history"] = "ok"
+
+# insider trades (SEBI PIT): refresh the last 30 days every run; a full year on the first run
+os.makedirs("insider", exist_ok=True)
+ipath = "insider/insider.csv"; ins = {}
+if os.path.exists(ipath):
+    for row in csv.DictReader(open(ipath)):
+        ins[tuple(row.values())] = row
+span = 30 if ins else 365
+start, got_i = TODAY - dt.timedelta(days=span), False
+while start <= TODAY:
+    end = min(start + dt.timedelta(days=30), TODAY)
+    j = api("corporates-pit?index=equities&from_date=%s&to_date=%s" % (ddmmyyyy(start), ddmmyyyy(end)))
+    for o in rows_of(j):
+        d = iso_of(str(pick(o, "date", "intimDt", "acqtoDt", "acqfromDt"))[:11])
+        sym = str(pick(o, "symbol")).strip().upper()
+        if not d or not sym:
+            continue
+        got_i = True
+        typ = str(pick(o, "tdpTransactionType", "acqMode", "secAcqType"))
+        row = {"date": d, "symbol": sym, "who": str(pick(o, "acqName", "name")).replace(",", ";").strip(), "role": str(pick(o, "personCategory", "category")).replace(",", ";"),
+               "side": "SELL" if any(w in typ.lower() for w in ("sell", "dispos", "revok", "pledge")) else "BUY", "type": typ.replace(",", ";"),
+               "qty": num(pick(o, "secAcq", "secAcquired")), "value": num(pick(o, "secVal", "value")), "after": num(pick(o, "afterAcqSharesPer", "secAcqPer"))}
+        ins[tuple(str(row[k]) for k in row)] = row
+    start = end + dt.timedelta(days=1); time.sleep(1)
+STATUS["insider"] = "ok" if got_i else "blocked"
+cut_i = (TODAY - dt.timedelta(days=366)).isoformat()
+with open(ipath, "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=["date", "symbol", "who", "role", "side", "type", "qty", "value", "after"]); w.writeheader()
+    for row in sorted(ins.values(), key=lambda r: (r["date"], r["symbol"]), reverse=True):
+        if row["date"] >= cut_i:
+            w.writerow(row)
+print("insider trades kept:", len(ins), STATUS["insider"])
+
+# corporate announcements: last 45 days
+os.makedirs("announcements", exist_ok=True)
+apath = "announcements/ann.csv"; ann = {}
+if os.path.exists(apath):
+    for row in csv.DictReader(open(apath)):
+        ann[(row["date"], row["symbol"], row["subject"], row["link"])] = row
+start, got_a = TODAY - dt.timedelta(days=(7 if ann else 45)), False
+while start <= TODAY:
+    end = min(start + dt.timedelta(days=7), TODAY)
+    j = api("corporate-announcements?index=equities&from_date=%s&to_date=%s" % (ddmmyyyy(start), ddmmyyyy(end)))
+    for o in rows_of(j):
+        d = iso_of(str(pick(o, "an_dt", "sort_date", "dt"))[:11])
+        sym = str(pick(o, "symbol")).strip().upper()
+        if not d or not sym:
+            continue
+        got_a = True
+        row = {"date": d, "symbol": sym, "subject": " ".join(str(pick(o, "desc", "subject")).split())[:160],
+               "text": " ".join(str(pick(o, "attchmntText")).split())[:300], "link": str(pick(o, "attchmntFile"))}
+        ann[(row["date"], row["symbol"], row["subject"], row["link"])] = row
+    start = end + dt.timedelta(days=1); time.sleep(1)
+STATUS["announcements"] = "ok" if got_a else "blocked"
+cut_a = (TODAY - dt.timedelta(days=45)).isoformat()
+with open(apath, "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=["date", "symbol", "subject", "text", "link"]); w.writeheader()
+    for row in sorted(ann.values(), key=lambda r: (r["date"], r["symbol"]), reverse=True):
+        if row["date"] >= cut_a:
+            w.writerow(row)
+print("announcements kept:", len(ann), STATUS["announcements"])
+
+# FII / DII (whole market, ₹ crore): NSE publishes only the latest day, so it builds up day by day
+os.makedirs("fiidii", exist_ok=True)
+fpath = "fiidii/fiidii.csv"; fd = {}
+if os.path.exists(fpath):
+    for row in csv.DictReader(open(fpath)):
+        fd[(row["date"], row["who"])] = row
+got_f = False
+for o in rows_of(api("fiidiiTradeReact")):
+    d = iso_of(str(pick(o, "date")))
+    if not d:
+        continue
+    got_f = True
+    who = "FII / FPI" if any(w in str(o.get("category", "")).lower() for w in ("fii", "fpi")) else "DII"
+    fd[(d, who)] = {"date": d, "who": who, "buy": num(o.get("buyValue")), "sell": num(o.get("sellValue")), "net": num(o.get("netValue"))}
+STATUS["fiidii"] = "ok" if got_f else "blocked"
+with open(fpath, "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=["date", "who", "buy", "sell", "net"]); w.writeheader()
+    for row in sorted(fd.values(), key=lambda r: (r["date"], r["who"]), reverse=True)[:800]:
+        w.writerow(row)
+print("FII/DII days:", len(fd) // 2, STATUS["fiidii"])
+
 keep_from = (TODAY - dt.timedelta(days=400)).isoformat()
 with open(dpath, "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=["date", "kind", "symbol", "client", "side", "qty", "price"]); w.writeheader()
@@ -128,3 +267,5 @@ with open(dpath, "w", newline="") as f:
         if row["date"] >= keep_from:
             w.writerow(row)
 print("deals kept:", len(deals))
+json.dump({"updated": NOW.strftime("%Y-%m-%d %H:%M IST"), "parts": STATUS}, open("status.json", "w"), indent=1)
+print("status:", STATUS)
