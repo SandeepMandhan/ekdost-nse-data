@@ -1,0 +1,27 @@
+name: NSE daily data for EkDost
+on:
+  schedule:
+    - cron: "45 13 * * 1-5"   # 7:15 PM IST, Mon–Fri (after NSE publishes the day's files)
+    - cron: "30 2 * * *"      # 8:00 AM IST every day: catches anything missed
+  workflow_dispatch:          # "Run workflow" button (first run fills a year of history)
+permissions:
+  contents: write
+concurrency: nse-data
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - run: python fetch_nse.py
+      - name: Save to the repository
+        run: |
+          git config user.name "ekdost-nse-bot"
+          git config user.email "ekdost-nse-bot@users.noreply.github.com"
+          git add -A
+          git commit -m "NSE data $(date -u +%Y-%m-%d)" || echo "Nothing new"
+          git push
