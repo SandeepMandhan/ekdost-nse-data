@@ -114,9 +114,10 @@ if os.path.exists(dpath):
         deals[(row["date"], row["kind"], row["symbol"], row["client"], row["side"], row["qty"], row["price"])] = row
 
 def iso_of(x):
-    for f in ("%d-%b-%Y", "%d-%B-%Y", "%d/%m/%Y", "%Y-%m-%d"):
+    x = str(x or "").strip().replace("T", " ").split(" ")[0].strip()
+    for f in ("%d-%b-%Y", "%d-%B-%Y", "%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d", "%d-%b-%y", "%d %b %Y"):
         try:
-            return dt.datetime.strptime(x.strip().title(), f).date().isoformat()
+            return dt.datetime.strptime(x.title(), f).date().isoformat()
         except Exception:
             pass
     return ""
@@ -206,7 +207,7 @@ ipath = "insider/insider.csv"; ins = {}
 if os.path.exists(ipath):
     for row in csv.DictReader(open(ipath)):
         ins[tuple(row.values())] = row
-icov_path = "insider/coverage.json"; icov = load_cov(icov_path); recent = {k for k, a, b in months_back(1)}
+icov_path = "insider/coverage2.json"; icov = load_cov(icov_path)   # (v2: re-checks every window once); recent = {k for k, a, b in months_back(1)}
 for key, a, b in months_back(12):
     halves = [(a, min(a + dt.timedelta(days=14), b))] + ([(a + dt.timedelta(days=15), b)] if a + dt.timedelta(days=15) <= b else [])
     for n_, (x, y) in enumerate(halves):
@@ -216,9 +217,9 @@ for key, a, b in months_back(12):
         j = api("corporates-pit?index=equities&from_date=%s&to_date=%s" % (ddmmyyyy(x), ddmmyyyy(y)))
         if j is None:
             continue
-        icov[ck] = NOW.strftime("%Y-%m-%d")
-        for o in rows_of(j):
-            d = iso_of(str(pick(o, "date", "intimDt", "acqtoDt", "acqfromDt"))[:11])
+        raw, parsed, dates_seen = rows_of(j), 0, set()
+        for o in raw:
+            d = iso_of(pick(o, "date", "intimDt", "acqtoDt", "acqfromDt"))
             sym = str(pick(o, "symbol")).strip().upper()
             if not d or not sym:
                 continue
@@ -227,9 +228,17 @@ for key, a, b in months_back(12):
                    "side": "SELL" if any(w in typ.lower() for w in ("sell", "dispos", "revok", "pledge")) else "BUY", "type": typ.replace(",", ";"),
                    "qty": num(pick(o, "secAcq", "secAcquired")), "value": num(pick(o, "secVal", "value")), "after": num(pick(o, "afterAcqSharesPer", "secAcqPer"))}
             ins[tuple(str(row[k]) for k in row)] = row
+            parsed += 1; dates_seen.add(d)
+        print("insider %s..%s: NSE sent %d rows, read %d (%s .. %s)" % (x, y, len(raw), parsed, min(dates_seen) if dates_seen else "-", max(dates_seen) if dates_seen else "-"))
+        if raw and not parsed:
+            print("  sample row:", json.dumps(raw[0])[:600])
+        elif raw or (TODAY - y).days > 3:
+            icov[ck] = NOW.strftime("%Y-%m-%d")
         time.sleep(1.2)
 json.dump(icov, open(icov_path, "w"), indent=0)
 imiss = [k for k, a, b in months_back(12) if not icov.get(k + "-0")]
+if os.path.exists("insider/coverage.json"):
+    os.remove("insider/coverage.json")
 got_i = not imiss
 print("insider windows missing:", imiss)
 STATUS["insider"] = "ok" if got_i else ("partial" if len(imiss) < 12 else "blocked")
