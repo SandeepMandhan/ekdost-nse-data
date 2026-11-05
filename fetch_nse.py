@@ -8,6 +8,7 @@ so the EkDost app (on Google's servers, which NSE blocks) can read them from Git
   insider/insider.csv                  promoter & insider trades (SEBI PIT disclosures), one year
   announcements/ann.csv                corporate announcements, last 45 days
   fiidii/fiidii.csv                    FII / DII cash-market buying and selling, built up day by day
+  meta/changes.json                    NSE symbol changes and company name changes (from NSE's symbolchange.csv / namechange.csv)
   fiidii/participant_oi.csv            F&O open positions of FII, DII, Pro and Client (index / stock futures and options), two years
   status.json                          which parts NSE allowed on the last run
 Nothing is changed or estimated: rows are copied from NSE's files and reports as published.
@@ -382,5 +383,47 @@ with open(dpath, "w", newline="") as f:
         if row["date"] >= keep_from:
             w.writerow(row)
 print("deals kept:", len(deals))
+
+# ---- symbol and company-name changes (NSE's own lists), so the app can bring old trades up to the current symbol ----
+def nse_date(x):
+    x = (x or "").strip()
+    for f in ("%d-%b-%Y", "%d-%b-%y", "%d-%m-%Y", "%d/%m/%Y", "%Y-%m-%d", "%d %b %Y"):
+        try:
+            return dt.datetime.strptime(x.title() if "%b" in f else x, f).date().isoformat()
+        except Exception:
+            pass
+    return ""
+def nse_rows(url, want):
+    r = get(url)
+    if r is None or r.status_code != 200 or len(r.content) < 50:
+        return None
+    rows = [[c.strip() for c in f] for f in csv.reader(io.StringIO(r.content.decode("utf-8", "ignore"))) if f and any(c.strip() for c in f)]
+    if not rows:
+        return None
+    head = [h.upper() for h in rows[0]]
+    if any("SYMBOL" in h or h.startswith(("SM_", "NCH_")) for h in head):
+        idx = []
+        for keys in want:
+            j = next((i for i, h in enumerate(head) if any(k in h for k in keys)), -1)
+            idx.append(j)
+        rows = rows[1:]
+    else:
+        idx = list(range(len(want)))
+    return [[(f[j] if 0 <= j < len(f) else "") for j in idx] for f in rows]
+os.makedirs("meta", exist_ok=True)
+mpath = "meta/changes.json"
+old = {}
+try:
+    old = json.load(open(mpath))
+except Exception:
+    pass
+sc = nse_rows("https://nsearchives.nseindia.com/content/equities/symbolchange.csv", [("NAME",), ("KEY_SYMBOL", "OLD"), ("NEW_SYMBOL", "NEW"), ("APPLICABLE", "DATE", "FROM")])
+nc = nse_rows("https://nsearchives.nseindia.com/content/equities/namechange.csv", [("SYMBOL",), ("PREV",), ("NEW",), ("DT", "DATE")])
+meta = {"updated": NOW.strftime("%Y-%m-%d %H:%M IST"),
+        "symbols": [[o.upper(), n.upper(), nse_date(d), nm] for nm, o, n, d in sc if o and n and o.upper() != n.upper()] if sc else old.get("symbols", []),
+        "names": [[sy.upper(), p, n, nse_date(d)] for sy, p, n, d in nc if sy and n] if nc else old.get("names", [])}
+json.dump(meta, open(mpath, "w"), separators=(",", ":"))
+STATUS["symbol_changes"] = "ok" if sc else ("kept old list" if old else "blocked")
+print("symbol changes:", len(meta["symbols"]), "name changes:", len(meta["names"]))
 json.dump({"updated": NOW.strftime("%Y-%m-%d %H:%M IST"), "parts": STATUS}, open("status.json", "w"), indent=1)
 print("status:", STATUS)
