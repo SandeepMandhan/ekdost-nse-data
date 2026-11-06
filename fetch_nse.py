@@ -8,6 +8,7 @@ so the EkDost app (on Google's servers, which NSE blocks) can read them from Git
   insider/insider.csv                  promoter & insider trades (SEBI PIT disclosures), one year
   announcements/ann.csv                corporate announcements, last 45 days
   fiidii/fiidii.csv                    FII / DII cash-market buying and selling, built up day by day
+  meta/corpactions.csv                 NSE splits, bonus issues and consolidations since 2012 (symbol, ex-date, subject)
   meta/changes.json                    NSE symbol changes and company name changes (from NSE's symbolchange.csv / namechange.csv)
   fiidii/participant_oi.csv            F&O open positions of FII, DII, Pro and Client (index / stock futures and options), two years
   status.json                          which parts NSE allowed on the last run
@@ -425,5 +426,40 @@ meta = {"updated": NOW.strftime("%Y-%m-%d %H:%M IST"),
 json.dump(meta, open(mpath, "w"), separators=(",", ":"))
 STATUS["symbol_changes"] = "ok" if sc else ("kept old list" if old else "blocked")
 print("symbol changes:", len(meta["symbols"]), "name changes:", len(meta["names"]))
+
+# ---- corporate actions: splits, bonus issues and consolidations (NSE), from 2012, so old trades can be adjusted ----
+import re
+capath, cacov = "meta/corpactions.csv", "meta/corpactions_cov.json"
+CA = {}
+try:
+    for row in csv.DictReader(open(capath)):
+        CA[(row["symbol"], row["exdate"], row["subject"])] = row
+except Exception:
+    pass
+cov2 = load_cov(cacov)
+got_ca = 0
+for y in range(2012, TODAY.year + 1):
+    key = str(y)
+    if cov2.get(key) and y < TODAY.year - 1:
+        continue
+    j = api("corporates-corporateActions?index=equities&from_date=01-01-%d&to_date=31-12-%d" % (y, y))
+    if j is None:
+        continue
+    for o in rows_of(j):
+        subj = str(pick(o, "subject", "purpose")).strip()
+        if not re.search(r"bonus|split|sub-?division|consolidat", subj, re.I):
+            continue
+        sym = str(pick(o, "symbol")).strip().upper(); ex = nse_date(str(pick(o, "exDate", "exdate", "ex_date")))
+        if sym and ex:
+            CA[(sym, ex, subj)] = {"symbol": sym, "exdate": ex, "subject": subj, "series": str(pick(o, "series")).strip()}
+    cov2[key] = 1; got_ca += 1
+    time.sleep(0.6)
+with open(capath, "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=["symbol", "exdate", "subject", "series"]); w.writeheader()
+    for row in sorted(CA.values(), key=lambda r: (r["symbol"], r["exdate"])):
+        w.writerow(row)
+json.dump(cov2, open(cacov, "w"))
+STATUS["corp_actions"] = "ok" if got_ca else ("kept old list" if CA else "blocked")
+print("corporate actions (splits / bonus):", len(CA), "years read this run:", got_ca)
 json.dump({"updated": NOW.strftime("%Y-%m-%d %H:%M IST"), "parts": STATUS}, open("status.json", "w"), indent=1)
 print("status:", STATUS)
