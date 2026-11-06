@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-06 08:44 IST",
+ "updated": "2026-11-06 19:14 IST",
  "parts": {
   "daily": "ok",
   "deals_today": "ok",
@@ -8,6 +8,7 @@
   "announcements": "ok",
   "fiidii": "ok",
   "participant_oi": "ok",
-  "symbol_changes": "ok"
+  "symbol_changes": "ok",
+  "corp_actions": "ok"
  }
 }
