@@ -11,6 +11,13 @@ so the EkDost app (on Google's servers, which NSE blocks) can read them from Git
   meta/corpactions.csv                 NSE splits, bonus issues and consolidations since 2012 (symbol, ex-date, subject)
   meta/changes.json                    NSE symbol changes and company name changes (from NSE's symbolchange.csv / namechange.csv)
   fiidii/participant_oi.csv            F&O open positions of FII, DII, Pro and Client (index / stock futures and options), two years
+  meta/breadth.csv                     market breadth worked out from the daily files: rising vs falling shares, % above their
+                                       50- and 200-day averages, new 52-week highs and lows (last 120 trading days)
+  meta/industry.csv                    each share's industry (NSE's Nifty Total Market list), for sector comparisons
+  events/events.csv                    upcoming board meetings (results etc.) and ex-dates, next 60 days and the last 10
+  fo/YYYY-MM-DD.csv, fo/index.json     stock futures & options per share for the last 20 trading days: futures close, open interest
+                                       and its change, call and put open interest (from NSE's F&O bhavcopy)
+  pledge/pledge.csv                    promoter shares pledged (NSE's pledge disclosures)
   status.json                          which parts NSE allowed on the last run
 Nothing is changed or estimated: rows are copied from NSE's files and reports as published.
 """
@@ -461,5 +468,226 @@ with open(capath, "w", newline="") as f:
 json.dump(cov2, open(cacov, "w"))
 STATUS["corp_actions"] = "ok" if got_ca else ("kept old list" if CA else "blocked")
 print("corporate actions (splits / bonus):", len(CA), "years read this run:", got_ca)
+
+# ======================= Research data for 🎯 Next move =======================
+def name_key(x):
+    x = re.sub(r"\b(limited|ltd|the|and|&|india|co|company|corporation|corp)\b", " ", (x or "").lower())
+    return re.sub(r"[^a-z0-9]", "", x)
+
+# ---- market breadth from the daily files already here (no extra download) ----
+try:
+    series = {}                                   # symbol -> [(date, close, prev)]
+    for iso in sorted(have)[-330:]:
+        p_ = "bhav/sec_bhavdata_full_%s.csv" % dt.date.fromisoformat(iso).strftime("%d%m%Y")
+        try:
+            rd = csv.reader(open(p_))
+            head = [h.strip().upper() for h in next(rd)]
+            ci, pi, si, se = head.index("CLOSE_PRICE"), head.index("PREV_CLOSE"), head.index("SYMBOL"), head.index("SERIES")
+        except Exception:
+            continue
+        for f in rd:
+            if len(f) <= max(ci, pi, si) or f[se].strip() not in ("EQ", "BE"):
+                continue
+            c_, p0 = num(f[ci]), num(f[pi])
+            if c_ == "" or p0 == "" or c_ <= 0:
+                continue
+            series.setdefault(f[si].strip(), []).append((iso, c_, p0))
+    dates = sorted(have)[-330:]
+    pos = {d: i for i, d in enumerate(dates)}
+    B = {d: {"adv": 0, "dec": 0, "unch": 0, "a50": 0, "n50": 0, "a200": 0, "n200": 0, "hi": 0, "lo": 0} for d in dates[-120:]}
+    for sym, L in series.items():
+        closes = [x[1] for x in L]
+        cs = [0.0]
+        for x in closes:
+            cs.append(cs[-1] + x)
+        for k, (d, c_, p0) in enumerate(L):
+            if d not in B:
+                continue
+            b = B[d]
+            if c_ > p0 * 1.0005: b["adv"] += 1
+            elif c_ < p0 * 0.9995: b["dec"] += 1
+            else: b["unch"] += 1
+            if k >= 49:
+                b["n50"] += 1; b["a50"] += c_ > (cs[k + 1] - cs[k - 49]) / 50
+            if k >= 199:
+                b["n200"] += 1; b["a200"] += c_ > (cs[k + 1] - cs[k - 199]) / 200
+            if k >= 245:
+                w = closes[k - 245:k]
+                if c_ > max(w): b["hi"] += 1
+                if c_ < min(w): b["lo"] += 1
+    os.makedirs("meta", exist_ok=True)
+    with open("meta/breadth.csv", "w", newline="") as f:
+        w = csv.writer(f); w.writerow(["date", "adv", "dec", "unch", "pct_above_50dma", "pct_above_200dma", "new_52w_highs", "new_52w_lows"])
+        for d in sorted(B, reverse=True):
+            b = B[d]
+            if b["adv"] + b["dec"] == 0:
+                continue
+            w.writerow([d, b["adv"], b["dec"], b["unch"], round(b["a50"] * 100 / b["n50"], 1) if b["n50"] else "",
+                        round(b["a200"] * 100 / b["n200"], 1) if b["n200"] else "", b["hi"], b["lo"]])
+    STATUS["breadth"] = "ok"
+    print("breadth days:", len(B))
+except Exception as e:
+    print("breadth:", e); STATUS["breadth"] = "error"
+
+# ---- industry of each share (NSE index lists: Company Name, Industry, Symbol) ----
+IND = {}
+for u in ("https://nsearchives.nseindia.com/content/indices/ind_niftytotalmarket_list.csv",
+          "https://nsearchives.nseindia.com/content/indices/ind_nifty500list.csv",
+          "https://nsearchives.nseindia.com/content/indices/ind_niftymicrocap250_list.csv"):
+    r = get(u)
+    if r is None or r.status_code != 200:
+        continue
+    rows = list(csv.reader(io.StringIO(r.content.decode("utf-8", "ignore"))))
+    if not rows:
+        continue
+    head = [h.strip().lower() for h in rows[0]]
+    if "symbol" not in head or "industry" not in head:
+        continue
+    si, ii = head.index("symbol"), head.index("industry")
+    for f in rows[1:]:
+        if len(f) > max(si, ii) and f[si].strip() and f[si].strip().upper() not in IND:
+            IND[f[si].strip().upper()] = f[ii].strip()
+if IND:
+    with open("meta/industry.csv", "w", newline="") as f:
+        w = csv.writer(f); w.writerow(["symbol", "industry"])
+        for k in sorted(IND):
+            w.writerow([k, IND[k]])
+STATUS["industry"] = "ok" if IND else ("kept old list" if os.path.exists("meta/industry.csv") else "blocked")
+print("industry list:", len(IND))
+
+# company name -> symbol (NSE's equity list), for reports that give only the company name
+NAME2SYM = {}
+r = get("https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv")
+if r is not None and r.status_code == 200:
+    for f in list(csv.reader(io.StringIO(r.content.decode("utf-8", "ignore"))))[1:]:
+        if len(f) > 1 and f[0].strip():
+            NAME2SYM[name_key(f[1])] = f[0].strip().upper()
+
+# ---- upcoming events: board meetings (results, dividends, fund raising) and ex-dates ----
+os.makedirs("events", exist_ok=True)
+EV = {}
+for o in rows_of(api("event-calendar")):
+    sym = str(pick(o, "symbol")).strip().upper(); d = nse_date(str(pick(o, "date", "bm_date", "meetingDate")))
+    if sym and d:
+        txt = str(pick(o, "purpose", "bm_purpose")).strip(); desc = str(pick(o, "bm_desc", "desc", "description")).strip()
+        EV[(sym, d, "board", txt)] = {"date": d, "symbol": sym, "kind": "board", "text": (txt + (": " + desc if desc and desc.lower() != txt.lower() else ""))[:300]}
+got_ev = bool(EV)
+j = api("corporates-corporateActions?index=equities&from_date=%s&to_date=%s" % (ddmmyyyy(TODAY - dt.timedelta(days=10)), ddmmyyyy(TODAY + dt.timedelta(days=60))))
+for o in rows_of(j):
+    sym = str(pick(o, "symbol")).strip().upper(); d = nse_date(str(pick(o, "exDate", "exdate")))
+    if sym and d:
+        txt = str(pick(o, "subject", "purpose")).strip()
+        EV[(sym, d, "ex", txt)] = {"date": d, "symbol": sym, "kind": "ex", "text": txt[:300]}
+if j is not None:
+    got_ev = True
+if got_ev:
+    keep_ev = (TODAY - dt.timedelta(days=10)).isoformat()
+    with open("events/events.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["date", "symbol", "kind", "text"]); w.writeheader()
+        for row in sorted(EV.values(), key=lambda r: (r["date"], r["symbol"])):
+            if row["date"] >= keep_ev:
+                w.writerow(row)
+STATUS["events"] = "ok" if got_ev else "blocked"
+print("events:", len(EV))
+
+# ---- stock futures & options, per share per day (NSE F&O bhavcopy, UDiFF format) ----
+import zipfile
+os.makedirs("fo", exist_ok=True)
+fo_idx_path = "fo/index.json"
+try:
+    fo_dates = set(json.load(open(fo_idx_path)).get("dates", []))
+except Exception:
+    fo_dates = set()
+fo_dates = {d for d in fo_dates if os.path.exists("fo/%s.csv" % d)}
+want_fo = sorted(have, reverse=True)[:20]
+got_fo = 0
+for iso in want_fo:
+    if iso in fo_dates:
+        continue
+    r = get("https://nsearchives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_%s_F_0000.csv.zip" % iso.replace("-", ""))
+    if r is None or r.status_code != 200:
+        continue
+    try:
+        z = zipfile.ZipFile(io.BytesIO(r.content)); text = z.read(z.namelist()[0]).decode("utf-8", "ignore").lstrip("﻿")
+    except Exception as e:
+        print("fo", iso, e); continue
+    rd = csv.reader(io.StringIO(text)); head = [h.strip().lower() for h in next(rd)]
+    def ix(*names):
+        for n in names:
+            if n.lower() in head:
+                return head.index(n.lower())
+        return -1
+    iT, iS, iX, iC, iO, iOC, iOT, iU = ix("FinInstrmTp"), ix("TckrSymb"), ix("XpryDt"), ix("ClsPric"), ix("OpnIntrst"), ix("ChngInOpnIntrst"), ix("OptnTp"), ix("UndrlygPric")
+    if min(iT, iS, iO) < 0:
+        print("fo", iso, "unexpected columns"); continue
+    agg = {}
+    for f in rd:
+        if len(f) <= max(iT, iS, iO):
+            continue
+        tp = f[iT].strip().upper(); sym = f[iS].strip().upper()
+        if tp not in ("STF", "STO"):
+            continue
+        a = agg.setdefault(sym, {"symbol": sym, "fut_close": "", "und": "", "fut_oi": 0, "fut_oi_chg": 0, "call_oi": 0, "put_oi": 0, "_x": "9999"})
+        oi = num(f[iO]) or 0
+        if tp == "STF":
+            a["fut_oi"] += oi; a["fut_oi_chg"] += (num(f[iOC]) or 0) if iOC >= 0 else 0
+            x = f[iX].strip() if iX >= 0 else ""
+            if x and x < a["_x"]:
+                a["_x"] = x; a["fut_close"] = num(f[iC]) if iC >= 0 else ""
+                if iU >= 0: a["und"] = num(f[iU])
+        else:
+            if iOT >= 0 and f[iOT].strip().upper() == "CE": a["call_oi"] += oi
+            elif iOT >= 0 and f[iOT].strip().upper() == "PE": a["put_oi"] += oi
+    if not agg:
+        continue
+    with open("fo/%s.csv" % iso, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["symbol", "fut_close", "und", "fut_oi", "fut_oi_chg", "call_oi", "put_oi"], extrasaction="ignore"); w.writeheader()
+        for k in sorted(agg):
+            w.writerow(agg[k])
+    fo_dates.add(iso); got_fo += 1
+    time.sleep(0.6)
+keep_fo = set(sorted(fo_dates, reverse=True)[:20])
+for fn in os.listdir("fo"):
+    if fn.endswith(".csv") and fn[:-4] not in keep_fo:
+        os.remove("fo/" + fn)
+json.dump({"dates": sorted(keep_fo), "updated": NOW.strftime("%Y-%m-%d %H:%M IST")}, open(fo_idx_path, "w"))
+STATUS["fo"] = "ok" if keep_fo else "blocked"
+print("F&O days added:", got_fo, "kept:", len(keep_fo))
+
+# ---- promoter pledges (NSE pledge disclosures, latest per company) ----
+os.makedirs("pledge", exist_ok=True)
+pj = api("corporate-pledgedata?index=equities")
+PL = {}
+first_keys = []
+for o in rows_of(pj):
+    if not first_keys:
+        first_keys = list(o.keys())
+    sym = str(pick(o, "symbol", "sym")).strip().upper() or NAME2SYM.get(name_key(str(pick(o, "comName", "companyName", "company"))), "")
+    if not sym:
+        continue
+    def find(*pats):
+        for k in o:
+            kl = k.lower()
+            if all(p in kl for p in pats):
+                return o[k]
+        return ""
+    prom = num(pick(o, "percPromoterHolding") or find("perc", "promoter", "holding"))
+    pl_prom = num(pick(o, "percPromoterShares") or find("perc", "promoter", "share"))
+    pl_tot = num(pick(o, "percTotShares", "percTstotShares") or find("perc", "tot"))
+    d = nse_date(str(pick(o, "shp", "disclosureDate", "broadcastDt", "date")).split(" ")[0])
+    old_ = PL.get(sym)
+    if old_ and old_["date"] >= d:
+        continue
+    PL[sym] = {"symbol": sym, "date": d, "promoter_pct": prom, "pledged_pct_of_promoter": pl_prom, "pledged_pct_of_total": pl_tot}
+if PL:
+    with open("pledge/pledge.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["symbol", "date", "promoter_pct", "pledged_pct_of_promoter", "pledged_pct_of_total"]); w.writeheader()
+        for k in sorted(PL):
+            w.writerow(PL[k])
+STATUS["pledge"] = "ok" if PL else ("kept old list" if os.path.exists("pledge/pledge.csv") else "blocked")
+if first_keys:
+    STATUS["pledge_fields"] = ",".join(first_keys)[:300]
+print("pledge rows:", len(PL))
+
 json.dump({"updated": NOW.strftime("%Y-%m-%d %H:%M IST"), "parts": STATUS}, open("status.json", "w"), indent=1)
 print("status:", STATUS)
