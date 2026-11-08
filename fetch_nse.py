@@ -8,7 +8,7 @@ so the EkDost app (on Google's servers, which NSE blocks) can read them from Git
   insider/insider.csv                  promoter & insider trades (SEBI PIT disclosures), one year
   announcements/ann.csv                corporate announcements, last 45 days
   fiidii/fiidii.csv                    FII / DII cash-market buying and selling, built up day by day
-  meta/corpactions.csv                 NSE splits, bonus issues and consolidations since 2012 (symbol, ex-date, subject)
+  meta/corpactions.csv                 NSE splits, bonus issues and consolidations since 2005 (symbol, ex-date, subject)
   meta/changes.json                    NSE symbol changes and company name changes (from NSE's symbolchange.csv / namechange.csv)
   fiidii/participant_oi.csv            F&O open positions of FII, DII, Pro and Client (index / stock futures and options), two years
   meta/breadth.csv                     market breadth worked out from the daily files: rising vs falling shares, % above their
@@ -434,7 +434,7 @@ json.dump(meta, open(mpath, "w"), separators=(",", ":"))
 STATUS["symbol_changes"] = "ok" if sc else ("kept old list" if old else "blocked")
 print("symbol changes:", len(meta["symbols"]), "name changes:", len(meta["names"]))
 
-# ---- corporate actions: splits, bonus issues and consolidations (NSE), from 2012, so old trades can be adjusted ----
+# ---- corporate actions: splits, bonus issues and consolidations (NSE), from 2005, so old trades can be adjusted ----
 import re
 capath, cacov = "meta/corpactions.csv", "meta/corpactions_cov.json"
 CA = {}
@@ -445,7 +445,7 @@ except Exception:
     pass
 cov2 = load_cov(cacov)
 got_ca = 0
-for y in range(2012, TODAY.year + 1):
+for y in range(2005, TODAY.year + 1):
     key = str(y)
     if cov2.get(key) and y < TODAY.year - 1:
         continue
