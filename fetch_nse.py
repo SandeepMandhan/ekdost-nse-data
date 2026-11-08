@@ -77,11 +77,12 @@ try:
 except Exception:
     idx = {"dates": [], "holidays": []}
 have, hol = set(idx.get("dates", [])), set(idx.get("holidays", []))
+SPECIAL_DAYS = {"2026-11-08"}                 # weekend sessions NSE trades on (Muhurat trading etc.)
 saved = failed = 0
 for i in range(DAYS):
     d = TODAY - dt.timedelta(days=i)
     iso = d.isoformat()
-    if d.weekday() > 4 or iso in have or iso in hol:
+    if (d.weekday() > 4 and iso not in SPECIAL_DAYS) or iso in have or iso in hol:
         continue
     if d == TODAY and NOW.hour < 18:
         continue                                  # today's file comes out in the evening
