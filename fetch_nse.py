@@ -18,6 +18,7 @@ so the EkDost app (on Google's servers, which NSE blocks) can read them from Git
   fo/YYYY-MM-DD.csv, fo/index.json     stock futures & options per share for the last 20 trading days: futures close, open interest
                                        and its change, call and put open interest (from NSE's F&O bhavcopy)
   pledge/pledge.csv                    promoter shares pledged (NSE's pledge disclosures)
+  meta/fmv_2018.csv                    each share's highest price on 31 Jan 2018 (tax grandfathering of older purchases)
   meta/latest.json                     the newest complete day ({date, at}); the app checks this to pick up a new day at once
   status.json                          which parts NSE allowed on the last run
 Nothing is changed or estimated: rows are copied from NSE's files and reports as published.
@@ -706,6 +707,54 @@ STATUS["pledge"] = "ok" if PL else ("kept old list" if os.path.exists("pledge/pl
 if first_keys:
     STATUS["pledge_fields"] = ",".join(first_keys)[:300]
 print("pledge rows:", len(PL))
+
+
+# ---------- 31 Jan 2018 prices, for the tax "grandfathering" of shares bought before 1 Feb 2018 (fetched once) ----------
+if not os.path.exists("meta/fmv_2018.csv"):
+    import zipfile
+    FMV = {}
+    for u in ("https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_31012018.csv",
+              "https://nsearchives.nseindia.com/content/historical/EQUITIES/2018/JAN/cm31JAN2018bhav.csv.zip",
+              "https://archives.nseindia.com/content/historical/EQUITIES/2018/JAN/cm31JAN2018bhav.csv.zip"):
+        r = get(u)
+        if r is None or r.status_code != 200:
+            continue
+        try:
+            text = zipfile.ZipFile(io.BytesIO(r.content)).read(zipfile.ZipFile(io.BytesIO(r.content)).namelist()[0]).decode("utf-8", "ignore") if u.endswith(".zip") else r.content.decode("utf-8", "ignore")
+        except Exception as e:
+            print("fmv 2018:", e); continue
+        rows = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
+        if not rows:
+            continue
+        head = [h_.strip().upper() for h_ in rows[0]]
+        def col(*names):
+            for n in names:
+                if n in head:
+                    return head.index(n)
+            return -1
+        si, se, hi, ci = col("SYMBOL"), col("SERIES"), col("HIGH_PRICE", "HIGH"), col("CLOSE_PRICE", "CLOSE")
+        if min(si, hi) < 0:
+            continue
+        for f in rows[1:]:
+            if len(f) <= max(si, hi):
+                continue
+            if se >= 0 and f[se].strip() not in ("EQ", "BE", "BZ", "SM", "ST"):
+                continue
+            sym = f[si].strip().upper(); v = num(f[hi])
+            if sym and v != "" and v > 0 and (sym not in FMV or v > FMV[sym][0]):
+                FMV[sym] = (v, num(f[ci]) if ci >= 0 else "")
+        if FMV:
+            break
+    if FMV:
+        os.makedirs("meta", exist_ok=True)
+        with open("meta/fmv_2018.csv", "w", newline="") as f:
+            w = csv.writer(f); w.writerow(["symbol", "high", "close"])
+            for k in sorted(FMV):
+                w.writerow([k, FMV[k][0], FMV[k][1]])
+    STATUS["fmv_2018"] = "ok (%d shares)" % len(FMV) if FMV else "blocked"
+    print("31-Jan-2018 prices:", len(FMV))
+else:
+    STATUS["fmv_2018"] = "ok"
 
 # the app checks only this small file to know a new day's data is complete
 os.makedirs("meta", exist_ok=True)
