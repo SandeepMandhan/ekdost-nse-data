@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-09 08:42 IST",
+ "updated": "2026-11-09 20:08 IST",
  "parts": {
   "daily": "ok",
   "deals_today": "ok",
@@ -14,6 +14,7 @@
   "industry": "ok",
   "events": "ok",
   "fo": "ok",
-  "pledge": "kept old list"
+  "pledge": "ok",
+  "pledge_fields": "broadcastDt,comName,compBroadcastDate,disclosureFromDate,disclosureToDate,nbfcNonPromoShare,nbfcPromoShare,noOfPledgeShare,noOfSecPledgeShare,numSharesPledged,percPromoterHolding,percPromoterShares,percSharesPledged,percTotShares,sharesCollateral,shp,totDematShares,totIssuedShares,totPromoterHolding"
  }
 }
