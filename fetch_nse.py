@@ -18,6 +18,7 @@ so the EkDost app (on Google's servers, which NSE blocks) can read them from Git
   fo/YYYY-MM-DD.csv, fo/index.json     stock futures & options per share for the last 20 trading days: futures close, open interest
                                        and its change, call and put open interest (from NSE's F&O bhavcopy)
   pledge/pledge.csv                    promoter shares pledged (NSE's pledge disclosures)
+  meta/latest.json                     the newest complete day ({date, at}); the app checks this to pick up a new day at once
   status.json                          which parts NSE allowed on the last run
 Nothing is changed or estimated: rows are copied from NSE's files and reports as published.
 """
@@ -135,6 +136,17 @@ json.dump({"dates": sorted(have), "holidays": sorted(h for h in hol if h >= cut)
           open(idx_path, "w"), indent=0)
 print("daily files saved:", saved, "failed:", failed, "total:", len(have))
 STATUS["daily"] = "ok" if have else "blocked"
+
+# ---------- evening quick exit: runs at ~6:20, 6:50, 7:20, 8:00 and 9:00 PM. Until NSE publishes today's file (or once today is
+# already complete) there's nothing new, so skip the heavy parts. Manual "Run workflow" always does a full run. ----------
+try:
+    _prev_latest = json.load(open("meta/latest.json")).get("date", "")
+except Exception:
+    _prev_latest = ""
+if (os.environ.get("GITHUB_EVENT_NAME", "") == "schedule" and NOW.hour >= 18 and saved == 0
+        and (TODAY.isoformat() not in have or _prev_latest == TODAY.isoformat())):
+    print("Nothing new from NSE yet (or today is already complete): quick exit; the next run will try again.")
+    sys.exit(0)
 
 # ---------- bulk & block deals ----------
 os.makedirs("deals", exist_ok=True)
@@ -695,5 +707,8 @@ if first_keys:
     STATUS["pledge_fields"] = ",".join(first_keys)[:300]
 print("pledge rows:", len(PL))
 
+# the app checks only this small file to know a new day's data is complete
+os.makedirs("meta", exist_ok=True)
+json.dump({"date": (sorted(have)[-1] if have else ""), "at": NOW.strftime("%H:%M"), "updated": NOW.strftime("%Y-%m-%d %H:%M IST")}, open("meta/latest.json", "w"))
 json.dump({"updated": NOW.strftime("%Y-%m-%d %H:%M IST"), "parts": STATUS}, open("status.json", "w"), indent=1)
 print("status:", STATUS)
