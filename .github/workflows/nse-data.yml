@@ -1,7 +1,11 @@
 name: NSE daily data for EkDost
 on:
   schedule:
-    - cron: "45 13 * * 1-5"   # 7:15 PM IST, Mon–Fri (after NSE publishes the day's files)
+    - cron: "50 12 * * *"     # 6:20 PM IST  ┐ evening runs: whichever comes first after NSE publishes the day's files
+    - cron: "20 13 * * *"     # 6:50 PM IST  │ does the full update; the others finish in under a minute
+    - cron: "50 13 * * *"     # 7:20 PM IST  │ (weekends too, for special sessions such as Muhurat trading)
+    - cron: "30 14 * * *"     # 8:00 PM IST  │
+    - cron: "30 15 * * *"     # 9:00 PM IST  ┘ for days NSE publishes late
     - cron: "30 2 * * *"      # 8:00 AM IST every day: catches anything missed
   workflow_dispatch:          # "Run workflow" button (first run fills a year of history)
 permissions:
