@@ -78,6 +78,7 @@ except Exception:
     idx = {"dates": [], "holidays": []}
 have, hol = set(idx.get("dates", [])), set(idx.get("holidays", []))
 SPECIAL_DAYS = {"2026-11-08"}                 # weekend sessions NSE trades on (Muhurat trading etc.)
+hol -= SPECIAL_DAYS                               # never treat a special session day as a holiday
 saved = failed = 0
 for i in range(DAYS):
     d = TODAY - dt.timedelta(days=i)
@@ -105,7 +106,11 @@ for i in range(DAYS):
     except Exception:
         fdate = d
     if fdate != d:                                # a market holiday: NSE serves the previous day's file under this name
-        hol.add(iso); continue
+        if (TODAY - d).days > 2 and iso not in SPECIAL_DAYS:
+            hol.add(iso)                          # only once it's clearly not coming; a fresh file may just not be out yet
+        else:
+            print(iso, "NSE still shows the previous day's file; will try again on the next run")
+        continue
     rows = [lines[0]] + [l for l in lines[1:] if len(l.split(",")) > 2 and l.split(",")[1].strip() in KEEP]
     with open("bhav/" + name, "w", newline="\n") as f:
         f.write("\n".join(rows) + "\n")
