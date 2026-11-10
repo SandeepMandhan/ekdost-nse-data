@@ -1,19 +1,4 @@
 date,symbol,kind,text
-2026-10-30,ADOR,ex,Interim Dividend - Rs 7.50 Per Share
-2026-10-30,CHENNPETRO,ex,Interim Dividend - Rs 25 Per Share
-2026-10-30,CUBEINVIT,ex,Distribution - Rs 3.79 Per Unit Consisting Of Rs 1.76 Per Unit As Interest/Re 0.32 Per Unit As Dividend/Rs 1.71 Per Unit As Return Of Capital
-2026-10-30,DALBHARAT,ex,Interim Dividend - Rs 4 Per Share
-2026-10-30,DCMSHRIRAM,ex,Interim Dividend - Rs 4 Per Share
-2026-10-30,EMBASSY,ex,Distribution - Rs 7.07 Per Unit Consisting Of Re 0.14 Per Unit As Interest/ Re 0.86 Per Unit As Dividend/ Rs 6.07 Per Unit As Repayment Of Spv Level Debt
-2026-10-30,GENUSPOWER,ex,Buy Back
-2026-10-30,RAILTEL,ex,Interim Dividend - Re 1 Per Share
-2026-10-30,RECLTD,ex,Interim Dividend - Rs 3.50 Per Share
-2026-10-30,SAGILITY,ex,Interim Dividend - Re 0.15 Per Share
-2026-10-30,SEITINVIT,ex,Distributn - Rs 3.13984 Per Unit Consist Of Rs 3.13797 Per Unit As Interest / Re 0.00187 Per Unit As Other Income
-2026-10-30,SIYSIL,ex,Interim Dividend - Rs 4 Per Share
-2026-10-30,SPLPETRO,ex,Interim Dividend - Rs 2.50 Per Share
-2026-10-30,SSWL,ex,Interim Dividend - Rs 1.50 Per Share
-2026-10-30,SUPREMEIND,ex,Interim Dividend - Rs 12 Per Share
 2026-11-02,COLPAL,ex,Interim Dividend - Rs 24 Per Share
 2026-11-02,PITTIENG,ex,Interim Dividend - Rs 2 Per Share
 2026-11-02,ROUTE,ex,Interim Dividend - Rs 4 Per Share
@@ -88,31 +73,6 @@ date,symbol,kind,text
 2026-11-09,RIIT,ex,Distribution - Rs 2.43 Per Unit Consists Of Interest - Rs 2.42/Other Income - Re 0.10
 2026-11-09,SAKSOFT,ex,Interim Dividend - Re 0.5 Per Share
 2026-11-09,TVSINVIT,ex,Distribution - Rs 1.67 Per Unit Consist Of Rs 1.57 Per Unit As Interest/ Re 0.10 Per Unit As Other Income
-2026-11-10,ARSSINFRA,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,AVANTIFEED,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
-2026-11-10,BAJFINANCE,board,"Other business matters: We wish to inform you that a meeting of the PI 2026- Special Committee of the Board of Directors of the Company is scheduled to be held on Tuesday, 10 November 2026"
-2026-11-10,COCHINSHIP,board,"Financial Results/Dividend: To consider and approve the financial results for the period ended September 30, 2026 and dividend"
-2026-11-10,DREDGECORP,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,HIRECT,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,IIFL,board,"Fund Raising: IIFL Finance Limited has informed the Exchanges regarding Board Meeting scheduled to be held on November 10, 2026 to consider and approve fund raising."
-2026-11-10,KALYANKJIL,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,KUNDANMM,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
-2026-11-10,LEEL,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,LFIC,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,MATRIMONY,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,MIDWESTLTD,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,MMTC,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
-2026-11-10,MRF,board,"Financial Results/Dividend: To consider and approve the financial results for the period ended September 30, 2026 and interim dividend, if any."
-2026-11-10,PILANIINVS,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
-2026-11-10,QUADFUTURE,board,"Financial Results: To inter-alia consider and approve the Unaudited financial results for the period ended September 30, 2026"
-2026-11-10,RENTOMOJO,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,ROSSELLIND,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,SIMPLEXINF,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,SURAKSHA,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,TITAGARH,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,UNITEDTEA,board,"Financial Results: To consider and approve the unaudited financial results for the quarter and half year ended September 30, 2026"
-2026-11-10,VHL,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-10,VIRINCHI,board,"Financial Results/Fund Raising: To consider and approve the financial results for the period ended September 30, 2026 and Fund Raising"
 2026-11-11,ADFFOODS,ex,Interim Dividend - Re 0.60 Per Share
 2026-11-11,AFSL,board,"Financial Results: To consider and approve the financial results for the quarter and half year ended September 30, 2026"
 2026-11-11,AIRAN,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
@@ -250,6 +210,7 @@ date,symbol,kind,text
 2026-11-12,GODFRYPHLP,ex,Interim Dividend - Rs 10 Per Share
 2026-11-12,GOLDTECH,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-12,GPPL,ex,Interim Dividend - Rs 3 Per Share
+2026-11-12,GUJRAFFIA,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-12,GULPOLY,board,"Financial Results/Other business matters: To consider and approve the Un-audited financial results for the quarter and half year ended September 30, 2026 and other business matters"
 2026-11-12,HAL,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-12,HAVISHA,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
@@ -548,8 +509,8 @@ date,symbol,kind,text
 2026-11-13,PENINLAND,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-13,PFOCUS,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-13,PGIL,ex,Interim Dividend - Rs 5 Per Share
-2026-11-13,POLYPLEX,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-13,POLYPLEX,board,Dividend: To consider dividend
+2026-11-13,POLYPLEX,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-13,PPAP,ex,Interim Dividend - Rs 1.50 Per Share
 2026-11-13,PRECOT,board,"Financial Results: To consider and approve the unaudited financial results for the period ended September 30, 2026"
 2026-11-13,PVP,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
@@ -674,6 +635,7 @@ date,symbol,kind,text
 2026-11-14,DCMSIL,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-14,DOLATALGO,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-14,DSFCL,board,"Financial Results: To consider and approve Unaudited Financial Results (both Standalone & Consolidated) for the quarter and half year ended September 30, 2026"
+2026-11-14,DSSL,board,"Financial Results: To consider and approve the un-audited financial results for the period ended September 30, 2026"
 2026-11-14,EUROBOND,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-14,EXPLEOSOL,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-14,FIRSTCRY,board,"Financial Results: Board meeting intimation for considering and approving the Un-audited Financial Results (Standalone and Consolidated) of the Company for the quarter and half year ended September 30, 2026"
