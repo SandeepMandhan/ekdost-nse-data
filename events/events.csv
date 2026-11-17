@@ -1,33 +1,4 @@
 date,symbol,kind,text
-2026-11-06,761GS2030,ex,Interest Payment
-2026-11-06,AMRUTANJAN,ex,Interim Dividend - Re 1 Per Share
-2026-11-06,ARE&M,ex,Interim Dividend - Rs 4.30 Per Share
-2026-11-06,CARERATING,ex,Interim Dividend - Rs 10 Per Share
-2026-11-06,CRIZAC,ex,Interim Dividend - Rs 4 Per Share
-2026-11-06,FLAIR,ex,Interim Dividend - Re 0.50 Per Share
-2026-11-06,GABRIEL,ex,Interim Dividend - Rs 2.15 Per Share
-2026-11-06,GOPAL,ex,Interim Dividend - Re 0.50 Per Share
-2026-11-06,HAPPSTMNDS,ex,Interim Dividend - Rs 3.05 Per Share
-2026-11-06,INDUSINVIT,ex,Distribution - Rs 3.55 Per Unit Consisting Of Rs 2.50 Per Unit As Interest/ Rs 1.05 Per Unit As Dividend
-2026-11-06,IRBIT,ex,Distribution - Rs 1.97 Per Unit Consisting Of Rs 1.66 Per Unit As Interest/ Re 0.31 Per Unit As Return Of Capital
-2026-11-06,KKCL,ex,Interim Dividend - Rs 2 Per Share
-2026-11-06,KMEW,ex,Face Value Split (Sub-Division) - From Rs 5/- Per Share To Re 1/- Per Share
-2026-11-06,KRT,ex,Distribution - Rs 1.723 Consisting Of Re 0.919 Per Unit As Dividend/ Rs 0.318 Per Unit As Interest/ Re 0.002 Per Unit As Other Income/ Re 0.484 Per Unit As Repayment Of Debt
-2026-11-06,KSCL,ex,Interim Dividend - Rs  5 Per Share
-2026-11-06,LAURUSLABS,ex,Interim Dividend - Re 1 Per Share
-2026-11-06,MANBA,ex,Interim Dividend - Re 0.25 Per Share
-2026-11-06,MOIL,ex,Interim Dividend - Rs 2.20 Per Share
-2026-11-06,NATIONALUM,ex,Interim Dividend - Rs 4.50 Per Share
-2026-11-06,NAUKRI,ex,Interim Dividend - Rs 3 Per Share
-2026-11-06,NDRINVIT,ex,Distribution - Rs 2 Per Unit Consist Of Re 0.83 Per Unit As Interest / Re 0.80 Per Unit As Return Of Capital/ Re 0.21 Per Unit As Dividend / Re 0.16 Per Unit Profit From Sale Of Mf
-2026-11-06,NTPC,ex,Interim Dividend - Rs 3 Per Share
-2026-11-06,NXST,ex,Distribution - Rs 2.367 Per Unit Consisting Of Re 0.985 As Interest/ Rs 1.051 Per Unit As Dividend/ Re 0.007 Per Unit As Other Income/ Re 0.324 Per Unit As Repayment Of Spv Level Debt
-2026-11-06,PETRONET,ex,Interim Dividend - Rs 7 Per Share
-2026-11-06,POWERGRID,ex,Interim Dividend - Rs 3 Per Share
-2026-11-06,QUESS,ex,Interim Dividend - Rs 5 Per Share
-2026-11-06,RKFORGE,ex,Interim Dividend - Rs 2 Per Share
-2026-11-06,SHREMINVIT,ex,Distribution - Rs 3 Per Unit Consist Of Re 0.4714 Per Unit As Dividend/ Rs 0.5055 Per Unit As Interest/ Rs 2.0231 Per Unit As Return Of Capital
-2026-11-06,SUNDRMFAST,ex,Interim Dividend - Rs 4.05 Per Share
 2026-11-09,694GS2036,ex,Interest Payment
 2026-11-09,824GS2033,ex,Interest Payment
 2026-11-09,DABUR,ex,Interim Dividend - Rs 3.50 Per Share
@@ -105,9 +76,7 @@ date,symbol,kind,text
 2026-11-16,COCHINSHIP,ex,Interim Dividend - Rs 3 Per Share
 2026-11-16,SCI,ex,Interim Dividend - Rs 4 Per Share
 2026-11-17,771GS2066,ex,Interest Payment
-2026-11-17,ADROITINFO,board,Other business matters: To consider other business matters
 2026-11-17,EDELALTS,ex,Interim Dividend - Rs 7 Per Share
-2026-11-17,LIBAS,board,"Financial Results/Other business matters: LIBAS : 17-Nov-2026 :  The Company has informed the Exchange that a Board meeting to be held on November 14, 2026 has been re-scheduled. Further, the Company has informed the Exchange that the meeting of the Board of Directors of the Company will be held on "
 2026-11-17,MRF,ex,Interim Dividend - Rs 3 Per Share
 2026-11-17,NILE,ex,Interim Dividend - Rs 3 Per Share
 2026-11-17,OSEINTRUST,ex,Distribution - Rs 3.4596 Per Unit Consists Of Rs 1.8659 Per Unit As Interest/ Rs 1.2797 Per Unit As Dividend/ Re 0.3140 Per Unit As Return Of Capital
@@ -120,7 +89,6 @@ date,symbol,kind,text
 2026-11-18,BLSPOLY,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-18,BONLON,board,"Fund Raising: Intimation of Rights Issue Committee Meeting Scheduled to be held on Wednesday, November 18, 2026 for deciding Issue Price and other terms of the Rights Issue"
 2026-11-18,CAPINVIT,ex,Distribution - Rs 2.30 Per Unit Consist Of Rs 1.20 Per Unit As Interest/ Re 0.70 Per Unit As Dividend/ Re 0.40 Per Unit As Repayment Of Capital
-2026-11-18,DRAGARWQ,ex,Merger
 2026-11-18,GLOBAL,ex,Buy Back
 2026-11-18,GVPTECH,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-18,JMA,ex,Buy Back
