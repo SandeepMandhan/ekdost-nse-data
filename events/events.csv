@@ -1,16 +1,4 @@
 date,symbol,kind,text
-2026-11-09,694GS2036,ex,Interest Payment
-2026-11-09,824GS2033,ex,Interest Payment
-2026-11-09,DABUR,ex,Interim Dividend - Rs 3.50 Per Share
-2026-11-09,ESABINDIA,ex,Interim Dividend - Rs 20 Per Share
-2026-11-09,GANESHCP,ex,Interim Dividend - Rs 3.70 Per Share
-2026-11-09,INTERISE,ex,Distribution - Rs 2.05 Per Unit Consisting Of Interest Payment - Rs 1.82 Per Unit/ Return On Capital - Re 0.02 Per Unit/ Dividend- Re 0.19 Per Unit / Other Income - Re 0.02
-2026-11-09,METROPOLIS,ex,Interim Dividend - Re 1 Per Share
-2026-11-09,NXT-INFRA,ex,Distribution - Rs 7.8073 Per Unit Consisting Of Rs 1.4766 As Dividend/ Rs 1.2924 As Interest/ Rs 1.2924 And Rs 5.0383 As Return Of Capital
-2026-11-09,OSWALAGRO,ex,Interim Dividend - Re 0.50 Per Share
-2026-11-09,RIIT,ex,Distribution - Rs 2.43 Per Unit Consists Of Interest - Rs 2.42/Other Income - Re 0.10
-2026-11-09,SAKSOFT,ex,Interim Dividend - Re 0.5 Per Share
-2026-11-09,TVSINVIT,ex,Distribution - Rs 1.67 Per Unit Consist Of Rs 1.57 Per Unit As Interest/ Re 0.10 Per Unit As Other Income
 2026-11-11,ADFFOODS,ex,Interim Dividend - Re 0.60 Per Share
 2026-11-11,AUROPHARMA,ex,Interim Dividend - Rs 7 Per Share
 2026-11-11,BALKRISIND,ex,Interim Dividend - Rs 4 Per Share
@@ -98,8 +86,6 @@ date,symbol,kind,text
 2026-11-20,ALUFLUOR,ex,Interim Dividend - Rs 2.50 Per Share
 2026-11-20,ASHOKLEY,ex,Interim Dividend - Re 1 Per Share
 2026-11-20,BFINVEST,ex,Interim Dividend - Rs 20 Per Share
-2026-11-20,GVPTECH,board,"Financial Results: GVPTECH : 20-Nov-2026 :  The Company has informed the Exchange that a Board meeting to be held on November 18, 2026 has been re-scheduled. Further, the Company has informed the Exchange that the meeting of the Board of Directors of the Company will be held on November 20, 2026,  T"
-2026-11-20,INDIANB,board,Fund Raising: To consider additional Capital Raising Plan of the Bank
 2026-11-20,JAMNAAUTO,ex,Interim Dividend - Re 1 Per Share
 2026-11-20,MARSONS,ex,Interim Dividend - Re 0.05 Per Share
 2026-11-20,MEDIASSIST,ex,Buy Back
@@ -109,10 +95,7 @@ date,symbol,kind,text
 2026-11-20,SKYWAYS,ex,Interim Dividend - Re 0.40 Per Share
 2026-11-20,SMLMAH,ex,Rights 2:7 @ Premium Rs 3496/-
 2026-11-20,STEELCAS,ex,Interim Dividend - Re 0.45 Per Share
-2026-11-20,SUKHJITS,board,"Buyback: Sukhjit Starch & Chemicals Ltd- has informed NSE that the meeting of the Board of Directors of the Company is scheduled on 20/11/2026, inter alia, to consider and approve the proposal for Buyback of the equity shares of the Company having face value of Rs. 5 each."
 2026-11-20,TALBROAUTO,ex,Interim Dividend - Re 0.30 Per Share
-2026-11-20,TTKHLTCARE,board,Bonus/Other business matters: To consider bonus and other business matters
-2026-11-20,VALECHAENG,board,"Financial Results: VALECHAENG : 20-Nov-2026 :  The Company has informed the Exchange that a Board meeting to be held on November 13, 2026 has been re-scheduled. Further, the Company has informed the Exchange that the meeting of the Board of Directors of the Company will be held on November 20, 2026,"
 2026-11-20,VENUSPIPES,ex,Interim Dividend - Re 0.50 Per Share
 2026-11-21,EMBDL,board,Fund Raising: Consideration And Approval Of The Raising Of Funds By Way Of Issuance Of Non-Convertible Debentures By Duly Constituted Committee Of Board Of Directors.
 2026-11-21,LAXMICOT,board,Other business matters: To consider other business matters
@@ -125,6 +108,7 @@ date,symbol,kind,text
 2026-11-23,VCL,board,"Fund Raising: To consider and approve the proposal for raising funds by the Company through the issuance of equity shares and/or other eligible securities or instruments, through one or more permissible modes, subject to applicable statutory and regulatory approvals."
 2026-11-24,HEADSUP,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-24,LEXUS,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
+2026-11-24,MKJEWELS,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-24,SETCO,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
 2026-11-25,ENRIN,board,"Financial Results/Dividend: To consider and approve the financial results for the period ended September 30, 2026 and dividend, if any."
 2026-11-25,SATIN,board,"Fund Raising: Working Committee Meeting is scheduled on 25/11/2026 ,inter alia, to consider and approve for Issuance Of Listed, Secured/Unsecured, Non-Convertible Debentures On Private Placement Basis."
