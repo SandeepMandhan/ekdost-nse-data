@@ -1,18 +1,4 @@
 date,symbol,kind,text
-2026-11-12,BAYERCROP,ex,Interim Dividend - Rs 90 Per Share
-2026-11-12,CITIUSINVT,ex,Distribution - Rs 2.9585 Per Unit Consists Of Rs 1.7560 Per Unit As Interest/ Re 0.4885 Per Unit As Repayment Of Debt/ Rs 0.6943 Per Unit As Dividend/ Rs 0.0197 Per Unit As Other Income
-2026-11-12,GAJA,ex,Interim Dividend - Re 0.50 Per Share
-2026-11-12,GODFRYPHLP,ex,Interim Dividend - Rs 10 Per Share
-2026-11-12,GPPL,ex,Interim Dividend - Rs 3 Per Share
-2026-11-12,GPTHEALTH,ex,Interim Dividend - Re 1 Per Share
-2026-11-12,HINDUNILVR,ex,Interim Dividend - Rs 19 Per Share
-2026-11-12,IMFA,ex,Interim Dividend - Rs 5 Per Share
-2026-11-12,INSECTICID,ex,Interim Dividend - Rs 5 Per Share
-2026-11-12,IRB,ex,Interim Dividend - Re 0.05 Per Share
-2026-11-12,NHIT,ex,Distribution - Rs 2.529 Per Unit Consisting Of Rs 2.518 Per Unit As Interest / Re 0.011 Per Unit As Other Income
-2026-11-12,NLCINDIA,ex,Interim Dividend - Rs 1.50 Per Share
-2026-11-12,ONGC,ex,Interim Dividend - Rs 8 Per Share
-2026-11-12,SAFARI,ex,Interim Dividend - Rs 2 Per Share
 2026-11-13,679GS2027,ex,Interest Payment
 2026-11-13,APTUS,ex,Interim Dividend - Rs 2 Per Share
 2026-11-13,ASTRAL,ex,Interim Dividend - Rs 1.50 Per Share
@@ -77,11 +63,7 @@ date,symbol,kind,text
 2026-11-20,TALBROAUTO,ex,Interim Dividend - Re 0.30 Per Share
 2026-11-20,VENUSPIPES,ex,Interim Dividend - Re 0.50 Per Share
 2026-11-23,815GS2026,ex,Interest Payment
-2026-11-23,BCSSL,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-23,DALBHARAT,board,Buyback/Other business matters: To consider buyback for equity shares and other business matters
 2026-11-23,PASHUPATI,ex,Interim Dividend - Re 0.02 Per Share
-2026-11-23,SFCTECH,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
-2026-11-23,VCL,board,"Fund Raising: To consider and approve the proposal for raising funds by the Company through the issuance of equity shares and/or other eligible securities or instruments, through one or more permissible modes, subject to applicable statutory and regulatory approvals."
 2026-11-24,HEADSUP,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
 2026-11-24,LEXUS,board,"Financial Results/Other business matters: To consider and approve the financial results for the period ended September 30, 2026 and other business matters"
 2026-11-24,MKJEWELS,board,"Financial Results: To consider and approve the financial results for the period ended September 30, 2026"
@@ -95,6 +77,7 @@ date,symbol,kind,text
 2026-11-26,COMSYN,board,"Other business matters: To consider related to allotment of upto 3,25,000 warrants."
 2026-11-26,DAVANGERE,board,Other business matters: To consider and discuss the revision in the conversion price of the outstanding Foreign Currency Convertible Bonds (FCCBs).
 2026-11-26,PATANJALI,board,"Dividend: To consider, approve and declare 2nd Interim Dividend for the financial year 2026-27 to the shareholders of the Company."
+2026-11-26,SGMART,board,Fund Raising: To consider Fund Raising
 2026-11-26,TEAMGTY,board,Fund Raising/Other business matters: To consider Fund Raising and other business matters
 2026-11-27,FUSIONCX,ex,Dividend - Re 0.75 Per Share
 2026-11-27,VGL,ex,Face Value Split (Sub-Division) - From Rs 5/- Per Share To Rs 2/- Per Share
